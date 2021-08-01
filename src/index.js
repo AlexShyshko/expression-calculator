@@ -110,6 +110,9 @@ function expressionCalculator(expr) {
                 }
                 rightChar = i;
                 i++;
+                if (str[i] === '.') {
+                    i++;
+                }
             }
 
             let leftOperand = +str.slice(leftChar, operator);
