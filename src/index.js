@@ -6,10 +6,6 @@ function eval() {
 function expressionCalculator(expr) {
     let expressionWithoutSpaces = expr.split(' ').join('');
 
-    let bracketsArr = ['(', ')'];//priority 3
-    let mulDivArr = ['*', '/'];//priority 2
-    let plusMinusArr = ['+', '-'];//priority 1
-
     /*function checking errors*/
 
     const funcCheckErr = function(str) {
@@ -51,8 +47,135 @@ function expressionCalculator(expr) {
     }
 
     let expressionWithoutErrors = expressionCheckedErrors;
-    return expressionWithoutErrors;
+    
+    /*function does one most priority action*/
 
+    const mostPriorityAction = function(str) {
+        let i = 0;
+        let result = str;
+        let operator = 0;
+        let leftChar = 0;
+        let rightChar = str.length - 1;
+        for (i = 0; i < str.length; i++) {
+            if (str[i] === ')') {
+                rightChar = i - 1;
+                result = str.slice(leftChar, rightChar + 1);
+                break;
+            }
+            if (str[i] === '(' && str[i + 1] !== '(') {
+                leftChar = i + 1;
+                result = str.slice(leftChar, rightChar + 1);
+            }
+        }
+
+        /*checking operators between brackets*/
+
+        if (result.includes('*') || result.includes('/') || result.includes('+') || result.includes('-')) {
+            result = str.slice(leftChar, rightChar + 1);
+        } else if (result.includes('(') || result.includes(')')) {
+            result = str.slice(leftChar, rightChar + 1);
+            str = `${str.slice(0, leftChar - 1)}${result}${str.slice(rightChar + 2)}`;
+            result = str;
+            leftChar = 0;
+            rightChar = str.length - 1;
+        } else {
+            result = str.slice(leftChar, rightChar + 1);
+            leftChar = 0;
+            rightChar = str.length - 1;
+        }
+
+        /*mostPriorityAction function begin operation*/
+
+        if (str.includes('(') || str.includes(')')) {
+            result = str;
+        }else if (result.includes('*') || result.includes('/')) {
+            i = leftChar;
+            if (str[0] === '-') {
+                i++;
+            }
+            while (i < rightChar) {
+                if (str[i] === '+' || str[i] === '-') {
+                    leftChar = i + 1;
+                } else if (str[i] === '*' || str[i] === '/') {
+                    operator = i;
+                    break;
+                }
+                i++;
+            }
+
+            i++;
+
+            while (str[i] < str.length) {
+                if (str[i] === '+' || str[i] === '-' || str[i] === '*' || str[i] === '/') {
+                    break;
+                }
+                rightChar = i;
+                i++;
+            }
+
+            let leftOperand = +str.slice(leftChar, operator);
+            let rightOperand = +str.slice(operator + 1, rightChar + 1);
+            let operationResult = 0;
+
+            if (str[operator] === '*') {
+                operationResult = leftOperand * rightOperand;
+            } else if (str[operator] === '/') {
+                operationResult = leftOperand / rightOperand;
+            }
+            result = `${str.slice(0, leftChar)}${operationResult}${str.slice(rightChar + 1)}`;
+        } else {
+            i = leftChar;
+            if (str[0] === '-') {
+                i++;
+            }
+            while (i < rightChar) {
+                if (str[i] === '+' || str[i] === '-') {
+                    operator = i;
+                    break;
+                }
+                i++;
+            }
+            i++;
+            while (i < str.length) {
+                if (str[i] === '.') {
+                    i++;
+                    rightChar = i;
+                }
+                if (str[i] === '+' || str[i] === '-') {
+                    break;
+                }
+                rightChar = i;
+                i++;
+            }
+
+            if (str.includes('+') || str.includes('*') || str.includes('/') || str.includes('(') || str.includes(')') || str.slice(1).includes('-')) {
+                let leftOperand = +str.slice(leftChar, operator);
+                let rightOperand = +str.slice(operator + 1, rightChar + 1);
+                let operationResult = 0;
+
+                if (str[operator] === '+') {
+                    operationResult = leftOperand + rightOperand;
+                } else if (str[operator] === '-') {
+                    operationResult = leftOperand - rightOperand;
+                }
+                result = `${str.slice(0, leftChar)}${operationResult}${str.slice(rightChar + 1)}`;
+            }
+        }
+        return result;
+    }
+
+    /*cycle does math actions*/
+
+    let currentAction = expressionWithoutErrors;
+    let expressionBeforeAction;
+    let expressionAfterAction;
+    do {
+        expressionBeforeAction = currentAction;
+        expressionAfterAction = mostPriorityAction(currentAction);
+        currentAction = expressionAfterAction;
+    } while (expressionBeforeAction !== expressionAfterAction);
+
+    return Number(Number(expressionAfterAction).toFixed(4));
 }
 
 module.exports = {
