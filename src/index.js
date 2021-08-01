@@ -70,7 +70,7 @@ function expressionCalculator(expr) {
 
         /*checking operators between brackets*/
 
-        if (result.includes('*') || result.includes('/') || result.includes('+') || result.includes('-')) {
+        if (result.includes('*') || result.includes('/') || result.includes('+') || result.slice(1).includes('-')) {
             result = str.slice(leftChar, rightChar + 1);
         } else if (result.includes('(') || result.includes(')')) {
             result = str.slice(leftChar, rightChar + 1);
@@ -79,16 +79,15 @@ function expressionCalculator(expr) {
             leftChar = 0;
             rightChar = str.length - 1;
         } else {
-            result = str.slice(leftChar, rightChar + 1);
+            str = `${str.slice(0, leftChar - 1)}${result}${str.slice(rightChar + 2)}`;
+            result = str;
             leftChar = 0;
             rightChar = str.length - 1;
         }
 
         /*mostPriorityAction function begin operation*/
 
-        if (str.includes('(') || str.includes(')')) {
-            result = str;
-        }else if (result.includes('*') || result.includes('/')) {
+        if (result.includes('*') || result.includes('/')) {
             i = leftChar;
             if (str[0] === '-') {
                 i++;
@@ -135,11 +134,15 @@ function expressionCalculator(expr) {
                 }
                 i++;
             }
-            i++;
+            i = operator + 1;
             while (i < str.length) {
                 if (str[i] === '.') {
                     i++;
                     rightChar = i;
+                }
+                if (str[i + 1] === ')') {
+                    rightChar = i;
+                    break;
                 }
                 if (str[i] === '+' || str[i] === '-') {
                     break;
@@ -172,6 +175,9 @@ function expressionCalculator(expr) {
     do {
         expressionBeforeAction = currentAction;
         expressionAfterAction = mostPriorityAction(currentAction);
+        if (!expressionAfterAction.includes('+') && !expressionAfterAction.includes('*') && !expressionAfterAction.includes('/') && !expressionAfterAction.slice(1).includes('-')) {
+            return Number(Number(expressionAfterAction).toFixed(4));
+        }
         currentAction = expressionAfterAction;
     } while (expressionBeforeAction !== expressionAfterAction);
 
