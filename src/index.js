@@ -62,9 +62,11 @@ function expressionCalculator(expr) {
                 result = str.slice(leftChar, rightChar + 1);
                 break;
             }
-            if (str[i] === '(' && str[i + 1] !== '(') {
+            if (str[i] === '(' && !str.slice(i + 1).includes('(')) {
                 leftChar = i + 1;
                 result = str.slice(leftChar, rightChar + 1);
+            } else if (str[i] === '(' && str.slice(i).includes('(')) {
+                leftChar = i + 1;
             }
         }
 
@@ -83,13 +85,14 @@ function expressionCalculator(expr) {
             result = str;
             leftChar = 0;
             rightChar = str.length - 1;
+            return result;
         }
 
         /*mostPriorityAction function begin operation*/
 
         if (result.includes('*') || result.includes('/')) {
             i = leftChar;
-            if (str[0] === '-') {
+            if (str[i] === '-') {
                 i++;
             }
             while (i < rightChar) {
@@ -103,6 +106,9 @@ function expressionCalculator(expr) {
             }
 
             i++;
+            if (str[i] === '-') {
+                i++;
+            }
 
             while (str[i] < str.length) {
                 if (str[i] === '+' || str[i] === '-' || str[i] === '*' || str[i] === '/') {
@@ -124,10 +130,20 @@ function expressionCalculator(expr) {
             } else if (str[operator] === '/') {
                 operationResult = leftOperand / rightOperand;
             }
+
+            operationResult = String(operationResult);
+            if (operationResult.includes('e')) {
+                for (i = 0; i < operationResult.length; i++) {
+                    if (operationResult[i] === 'e') {
+                        operationResult = operationResult.slice(0, i);
+                    }
+                }
+            }
+
             result = `${str.slice(0, leftChar)}${operationResult}${str.slice(rightChar + 1)}`;
         } else {
             i = leftChar;
-            if (str[0] === '-') {
+            if (str[i] === '-') {
                 i++;
             }
             while (i < rightChar) {
@@ -138,6 +154,11 @@ function expressionCalculator(expr) {
                 i++;
             }
             i = operator + 1;
+
+            if (str[i] === '-') {
+                i++;
+            }
+
             while (i < str.length) {
                 if (str[i] === '.') {
                     i++;
@@ -164,6 +185,16 @@ function expressionCalculator(expr) {
                 } else if (str[operator] === '-') {
                     operationResult = leftOperand - rightOperand;
                 }
+
+                operationResult = String(operationResult);
+                if (operationResult.includes('e')) {
+                    for (i = 0; i < operationResult.length; i++) {
+                        if (operationResult[i] === 'e') {
+                            operationResult = operationResult.slice(0, i);
+                        }
+                    }
+                }
+
                 result = `${str.slice(0, leftChar)}${operationResult}${str.slice(rightChar + 1)}`;
             }
         }
